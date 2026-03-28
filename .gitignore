@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Virtual environment
+venv/
+.venv/
+
+# Environment
+.env
+
+# Data — download from Mendeley (see README)
+data/raw/*
+data/processed/*
+data/sample/*
+!data/**/.gitkeep
+
+# Trained models (re-train from dashboard)
+models/*.pkl
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

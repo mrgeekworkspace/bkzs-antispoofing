@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BKZS Anti-Spoofing System</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <span class="app-title">BKZS ANTI-SPOOFING</span>
+        <span id="status-badge" class="status-badge nominal">NOMINAL</span>
+        <div id="attack-indicator" class="attack-indicator" style="display:none">
+            <span id="attack-type-display">--</span>
+            <span id="attack-intensity-display">0%</span>
+        </div>
+    </div>
+    <div class="topbar-right">
+        <div class="topbar-item">
+            <span class="topbar-label">SATS</span>
+            <span class="topbar-val" id="vis-count">0</span>
+        </div>
+        <div class="topbar-item">
+            <span class="topbar-label">METHOD</span>
+            <span id="method-badge">RULE</span>
+        </div>
+        <div class="topbar-item">
+            <span class="topbar-label">CONF</span>
+            <span class="topbar-val" id="detection-confidence">--</span>
+        </div>
+        <span id="ws-status" class="ws-status disconnected">DISCONNECTED</span>
+        <span id="clock">00:00:00Z</span>
+    </div>
+</div>
+
+<!-- MAIN GRID: Left | Globe | Right -->
+<div class="main-grid">
+
+    <!-- LEFT PANEL: Satellite list + Receiver metrics -->
+    <div class="left-panel">
+        <div class="panel-header">SATELLITES</div>
+        <div class="sat-list" id="sat-list">
+            <div class="sat-row"><span class="sat-dot gps"></span><span class="sat-id">Loading...</span></div>
+        </div>
+        <div class="panel-header">RECEIVER</div>
+        <div class="metrics-grid">
+            <div class="metric-box">
+                <div class="metric-label">HDOP</div>
+                <div class="metric-value" id="m-hdop">--</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">FIX</div>
+                <div class="metric-value" id="m-fix">--</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">POS ERR</div>
+                <div class="metric-value" id="m-pos">--</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">CLOCK</div>
+                <div class="metric-value" id="m-clock">--</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">AGC</div>
+                <div class="metric-value" id="m-agc">--</div>
+            </div>
+            <div class="metric-box">
+                <div class="metric-label">PDOP</div>
+                <div class="metric-value" id="m-pdop">--</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CENTER: 3D Globe -->
+    <div class="center-panel">
+        <div id="globe-container"></div>
+    </div>
+
+    <!-- RIGHT PANEL: Anomaly scores + Signal chart + Detection log -->
+    <div class="right-panel">
+        <div class="panel-header">ANOMALY SCORES</div>
+        <div class="anomaly-section">
+            <div class="score-row">
+                <span class="score-label">JAMMING</span>
+                <div class="score-bar"><div class="score-fill" id="bar-jamming" style="width:0%"></div></div>
+                <span class="score-val" id="val-jamming">0</span>
+            </div>
+            <div class="score-row">
+                <span class="score-label">SPOOFING</span>
+                <div class="score-bar"><div class="score-fill" id="bar-spoofing" style="width:0%"></div></div>
+                <span class="score-val" id="val-spoofing">0</span>
+            </div>
+            <div class="score-row">
+                <span class="score-label">INTGRTY</span>
+                <div class="score-bar"><div class="score-fill" id="bar-integrity" style="width:96%"></div></div>
+                <span class="score-val" id="val-integrity">96</span>
+            </div>
+            <div class="score-row">
+                <span class="score-label">ISO-F</span>
+                <div class="score-bar"><div class="score-fill" id="bar-iso" style="width:0%"></div></div>
+                <span class="score-val" id="val-iso">0</span>
+            </div>
+        </div>
+
+        <div class="detection-info">
+            <div>
+                <span style="font-size:9px;color:var(--text-dim)">DETECTION</span><br>
+                <span id="threat-type" class="threat-value nominal">NOMINAL</span>
+            </div>
+            <div style="text-align:right">
+                <span style="font-size:9px;color:var(--text-dim)">CONFIDENCE</span><br>
+                <span id="detection-confidence-lg" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:#22c55e">96%</span>
+            </div>
+        </div>
+
+        <div class="panel-header">SIGNAL HISTORY (C/N0)</div>
+        <div class="chart-section">
+            <canvas id="signal-chart"></canvas>
+        </div>
+
+        <div class="panel-header">DETECTION LOG</div>
+        <div class="det-log" id="det-log">
+            <div class="det-row">
+                <span class="det-time">--:--:--</span>
+                <span class="det-badge ok">INIT</span>
+                <span class="det-msg">Waiting for data...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM: Attack Control Panel + Alert Feed -->
+<div class="bottom-area">
+    <div class="attack-panel">
+        <div class="attack-panel-header">
+            <span class="attack-panel-title">RED TEAM CONTROL PANEL</span>
+            <button id="btn-stop-all" class="btn-attack btn-stop" style="width:auto;padding:5px 16px;margin:0">STOP ALL</button>
+        </div>
+        <div class="attack-grid">
+
+            <!-- JAMMING Section -->
+            <div class="attack-section">
+                <div class="attack-section-title">JAMMING</div>
+                <button id="btn-jam-start" class="btn-attack btn-jam">START JAMMING</button>
+                <div class="control-row">
+                    <span class="control-label">TYPE</span>
+                    <div class="radio-group">
+                        <input type="radio" name="jamming-subtype" value="WIDEBAND" id="j-wb" checked><label for="j-wb">WIDE</label>
+                        <input type="radio" name="jamming-subtype" value="NARROWBAND" id="j-nb"><label for="j-nb">NARROW</label>
+                        <input type="radio" name="jamming-subtype" value="PULSED" id="j-pl"><label for="j-pl">PULSED</label>
+                    </div>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">POWER</span>
+                    <input type="range" id="jamming-intensity" min="10" max="100" value="80">
+                    <span class="slider-val" id="jamming-intensity-val">80%</span>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">RAMP</span>
+                    <input type="range" id="jamming-ramp" min="1" max="15" value="3">
+                    <span class="slider-val" id="jamming-ramp-val">3s</span>
+                </div>
+            </div>
+
+            <!-- SPOOFING Section -->
+            <div class="attack-section">
+                <div class="attack-section-title">SPOOFING</div>
+                <button id="btn-spoof-start" class="btn-attack btn-spoof">START SPOOFING</button>
+                <div class="control-row">
+                    <span class="control-label">TYPE</span>
+                    <div class="radio-group">
+                        <input type="radio" name="spoofing-subtype" value="POSITION_PUSH" id="s-pp" checked><label for="s-pp">POS</label>
+                        <input type="radio" name="spoofing-subtype" value="TIME_PUSH" id="s-tp"><label for="s-tp">TIME</label>
+                        <input type="radio" name="spoofing-subtype" value="MEACONING" id="s-mc"><label for="s-mc">MEACON</label>
+                    </div>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">POWER</span>
+                    <input type="range" id="spoofing-intensity" min="10" max="100" value="80">
+                    <span class="slider-val" id="spoofing-intensity-val">80%</span>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">OFFSET</span>
+                    <input type="range" id="spoofing-offset" min="50" max="2000" value="500" step="50">
+                    <span class="slider-val" id="spoofing-offset-val">500m</span>
+                </div>
+                <div class="control-row">
+                    <span class="control-label">RAMP</span>
+                    <input type="range" id="spoofing-ramp" min="1" max="15" value="3">
+                    <span class="slider-val" id="spoofing-ramp-val">3s</span>
+                </div>
+            </div>
+
+            <!-- Training + Auto Demo + Thresholds -->
+            <div class="attack-section">
+                <div class="attack-section-title">MODEL & CONFIG</div>
+
+                <!-- Auto Demo -->
+                <div class="toggle-row">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="btn-auto-demo">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span style="font-size:9px;color:var(--text-dim)">AUTO DEMO CYCLE</span>
+                </div>
+
+                <!-- Training -->
+                <button id="btn-train-sim" class="btn-train">TRAIN ON SIMULATION</button>
+                <button id="btn-train-data" class="btn-train">TRAIN ON DATASET</button>
+                <input type="text" id="data-path" placeholder="Dataset path (optional)" style="width:100%;padding:3px 6px;background:rgba(0,20,40,0.5);border:1px solid var(--border);color:var(--text-primary);font-family:inherit;font-size:9px;border-radius:2px;margin-bottom:4px;">
+                <div id="models-status" class="models-status not-loaded">NO MODELS - TRAIN FIRST</div>
+                <div id="train-status"></div>
+
+                <!-- Thresholds -->
+                <div class="thresh-section collapsed">
+                    <div class="thresh-toggle">TUNING</div>
+                    <div class="thresh-body">
+                        <div class="control-row"><span class="control-label">CN0</span><input type="range" id="thresh-cn0" min="15" max="35" value="24" step="0.5"><span class="slider-val">24</span></div>
+                        <div class="control-row"><span class="control-label">AGC</span><input type="range" id="thresh-agc" min="0.1" max="0.8" value="0.35" step="0.05"><span class="slider-val">0.35</span></div>
+                        <div class="control-row"><span class="control-label">DOPPLR</span><input type="range" id="thresh-doppler" min="2" max="15" value="6" step="0.5"><span class="slider-val">6</span></div>
+                        <div class="control-row"><span class="control-label">POS-J</span><input type="range" id="thresh-pos" min="20" max="500" value="120" step="10"><span class="slider-val">120</span></div>
+                        <div class="control-row"><span class="control-label">CLK-J</span><input type="range" id="thresh-clock" min="2" max="50" value="12" step="1"><span class="slider-val">12</span></div>
+                        <button id="btn-apply-thresh" class="btn-train" style="margin-top:4px">APPLY THRESHOLDS</button>
+                        <button id="btn-reset-thresh" class="btn-train">RESET DEFAULTS</button>
+                        <div id="thresh-status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALERT FEED -->
+    <div class="alert-feed" id="alert-feed">
+        <div class="alert-line">
+            <span class="al-time">--:--:--Z</span>
+            <span class="al-badge CLEAR">INIT</span>
+            <span class="al-msg">System initializing... waiting for WebSocket connection</span>
+        </div>
+    </div>
+</div>
+
+<script src="js/globe.js"></script>
+<script src="js/dashboard.js"></script>
+
+</body>
+</html>
