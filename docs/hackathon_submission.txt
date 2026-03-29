@@ -1,0 +1,113 @@
+=====================================================================
+BKZS ANTI-SPOOFING SYSTEM — TUA ASTRO HACKATHON 2026 SUBMISSION
+=====================================================================
+
+=====================================================================
+ALAN 1: PROJE OZETI (Kisaca ne yapiyorsunuz?)
+=====================================================================
+
+BKZS Signal Validation & Anti-Spoofing System — GNSS uydu sinyallerini
+gercek zamanli olarak izleyen, jamming (sinyal bastirma) ve spoofing
+(sinyal sahteciligi) saldirilirini 3 katmanli yapay zeka ile tespit eden
+bir guvenlik sistemidir. 24 uydulu GNSS simulatoru, 6 farkli saldiri
+tipi, %99.1 dogruluklu ML tespit motoru ve interaktif 3D dashboard
+icermektedir.
+
+
+=====================================================================
+ALAN 2: DRIVE LINKI (Demo Video veya Sunum)
+=====================================================================
+
+[BU ALANA YUKLEYECEGINIZ DOSYA]
+
+Sunum dosyasi: docs/hackathon_presentation.html
+-> Bu dosyayi tarayicida acin, Ctrl+P ile PDF olarak kaydedin
+-> PDF'i Google Drive'a yukleyin, "Herkese Acik" yapin
+-> Linki bu alana yapistirin
+
+NOT: Sunum 7 sayfadir (limit dahilinde)
+
+
+=====================================================================
+ALAN 3: PROJE DOSYASI / LINKI
+=====================================================================
+
+https://github.com/mrgeekworkspace/bkzs-antispoofing
+
+
+=====================================================================
+ALAN 4: PROJE DETAYLI OZET
+=====================================================================
+
+## BKZS Signal Validation & Anti-Spoofing System
+
+### Proje Amaci
+BKZS (Bolgesel Konumlama ve Zamanlama Sistemi) icin gelistirilen bu
+prototip, GNSS sinyallerinin guvenilirligini gercek zamanli olarak
+dogrulamak ve jamming/spoofing saldirilirini yapay zeka destekli
+yontemlerle tespit etmek amaciyla tasarlanmistir.
+
+### Neden Bu Cozume Ihtiyac Var?
+GNSS sinyalleri dusuk guclu oldugundan kolayca bastirilabiir (jamming)
+veya taklit edilebilir (spoofing). Sivil havacilik, denizcilik, otonom
+araclar ve kritik altyapi icin bu tehditler hayati onem tasir. BKZS
+gibi bolgesel bir sistemin guvenligi, milli uzay hamlesinin kritik bir
+bilesenidir.
+
+### Nasil Calisiyor?
+
+**1. GNSS Simulatoru:**
+- 24 uydu takimyildizi (6 BKZS + 18 GPS)
+- 6 orbital duzlem, 55 derece egim acisi
+- Gercekci sinyal parametreleri: CN0, Doppler, AGC, saat kayasi, HDOP
+- Ankara (39.93N, 32.87E) merkezli alici konumu
+
+**2. Saldiri Motoru (Red Team):**
+- 3 Jamming tipi: Wideband, Narrowband, Pulsed
+- 3 Spoofing tipi: Position Push, Time Push, Meaconing
+- Ayarlanabilir yogunluk (0-100%) ve rampa suresi (0.5-30s)
+- Otomatik demo dongusu (sunum icin)
+
+**3. 3-Katmanli AI Tespit Motoru:**
+- Katman 1 — Kural Tabanli: Fizik tabanli esik degerleri ile anlik
+  tespit. CN0 < 24 dB-Hz -> Jamming, Doppler > 6 -> Spoofing gibi.
+- Katman 2 — Random Forest: 150 karar agacli denetimli siniflandirici.
+  3 sinif (Nominal/Jamming/Spoofing). %99.1 test dogrulugu, %98.4 CV F1.
+- Katman 3 — Isolation Forest: 200 agacli denetimsiz anomali tespiti.
+  Sadece nominal veri ile egitilir, bilinmeyen saldiri tiplerini yakalar.
+- Karar Fuzyonu: Kural (guven>=0.85) > RF (guven>=0.78) > ISO (skor>0.55)
+
+**4. 10 Boyutlu Ozellik Vektoru:**
+avg_cn0, min_cn0, std_cn0, cn0_delta, visible_count, hdop,
+pos_delta_m, clock_offset_delta_ns, doppler_residual, agc_level
+
+**5. Gercek Zamanli Dashboard:**
+- Interaktif 3D dunya kuresi (Three.js): uydu yorungeleri, baglanti
+  cizgileri, alici konumu, saldiri durumuna gore renk degisimi
+- Sol panel: canli uydu listesi (PRN, CN0, yukseklik)
+- Sag panel: anomali skorlari, sinyal tarihcesi grafigi, tespit logu
+- Alt panel: Red Team saldiri kontrol paneli, model egitimi, esik ayari
+- Istanbul saati (UTC+3), 2Hz guncelleme
+
+### Platform ve Teknolojiler
+- Backend: Python 3.13, FastAPI, scikit-learn, NumPy, Pandas
+- Frontend: HTML/CSS/JS, Three.js (3D), Canvas (grafikler)
+- Iletisim: WebSocket (2Hz canli akis), REST API
+- Veri: Mendeley GNSS Dataset Part III (Yunnan University)
+  https://data.mendeley.com/datasets/nxk9r22wd6/3
+
+### Acik Kaynak Veriler ve Kaynaklar
+- Mendeley GNSS Dataset with Interference and Spoofing (Part III)
+  Yunnan University tarafindan yayinlanan gercek GNSS olcum verileri
+- scikit-learn (makine ogrenmesi kutuphanesi)
+- Three.js (3D gorsellistirme kutuphanesi)
+- FastAPI (Python web framework)
+
+### Sonuclar
+- Jamming tespiti: ML-RF %87 guven, CN0 18 dB-Hz, AGC 0.27
+- Spoofing tespiti: Kural %96 guven, konum hatasi 945m
+- Nominal dogrulama: ML-RF %92 guven
+- Tespit suresi: < 500ms (gercek zamanli)
+
+### Kaynak Kod
+https://github.com/mrgeekworkspace/bkzs-antispoofing

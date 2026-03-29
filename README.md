@@ -13,6 +13,9 @@ Real-time GNSS signal validation and anti-spoofing prototype for BKZS (Bolgesel 
 - **Red Team Control Panel** — Start/stop attacks with configurable parameters directly from the UI
 - **WebSocket Streaming** — Live data at 2Hz for real-time visualization
 
+
+![dashboard](image.png)
+
 ## Quick Start
 
 ### 1. Install
