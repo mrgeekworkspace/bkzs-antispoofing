@@ -1,167 +1,167 @@
-# BKZS Signal Validation & Anti-Spoofing System
+# BKZS Sinyal Doğrulama ve Sahteciliğe Karşı Koruma Sistemi
 
-Real-time GNSS signal validation and anti-spoofing prototype for BKZS (Bolgesel Konumlama ve Zamanlama Sistemi).
+BKZS (Bölgesel Konumlama ve Zamanlama Sistemi) için gerçek zamanlı GNSS sinyal doğrulama ve sahteciliğe karşı koruma prototipi.
 
 **TUA Astro Hackathon 2026**
 
-## Features
+## Özellikler
 
-- **GNSS Signal Simulator** — 24-satellite constellation (6 BKZS + 18 GPS) with realistic CN0, Doppler, AGC, clock bias
-- **Attack Injection Engine** — Jamming (wideband/narrowband/pulsed) and spoofing (position push/time push/meaconing) with smooth intensity ramping
-- **3-Layer ML Detection** — Rule-based + Random Forest (supervised) + Isolation Forest (unsupervised anomaly)
-- **Real-Time Dashboard** — Interactive 3D globe with satellite tracking, connection lines, signal charts, anomaly scores
-- **Red Team Control Panel** — Start/stop attacks with configurable parameters directly from the UI
-- **WebSocket Streaming** — Live data at 2Hz for real-time visualization
+- **GNSS Sinyal Simülatörü** — Gerçekçi CN0, Doppler, AGC, saat kayması değerleriyle 24 uydulu konstellasyon (6 BKZS + 18 GPS)
+- **Saldırı Enjeksiyon Motoru** — Yumuşak yoğunluk artışıyla bozma (geniş bant/dar bant/darbeli) ve sahteciliği (konum itme/zaman itme/meaconing) saldırıları
+- **3 Katmanlı Makine Öğrenmesi Tespiti** — Kural tabanlı + Rastgele Orman (denetimli) + İzolasyon Ormanı (denetimsiz anomali)
+- **Gerçek Zamanlı Gösterge Paneli** — Uydu takibi, bağlantı hatları, sinyal grafikleri ve anomali skorlarıyla etkileşimli 3D küre
+- **Kırmızı Takım Kontrol Paneli** — Arayüzden doğrudan yapılandırılabilir parametrelerle saldırı başlatma/durdurma
+- **WebSocket Akışı** — Gerçek zamanlı görselleştirme için 2Hz'de canlı veri
 
 
-![dashboard](image.png)
+![gösterge paneli](image.png)
 
-## Quick Start
+## Hızlı Başlangıç
 
-### 1. Install
+### 1. Kurulum
 
 ```bash
 cd bkzs-antispoofing
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# OR: venv\Scripts\activate  # Windows
+# VEYA: venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-### 2. Download Dataset (Optional)
+### 2. Veri Kümesini İndir (İsteğe Bağlı)
 
-Download the Mendeley GNSS Dataset (Part III) and extract it into `data/raw/`:
+Mendeley GNSS Veri Kümesini (Bölüm III) indirin ve `data/raw/` dizinine çıkartın:
 
-**Dataset:** [GNSS Dataset with Interference and Spoofing — Part III](https://data.mendeley.com/datasets/nxk9r22wd6/3)
+**Veri Kümesi:** [Parazit ve Sahteciliği İçeren GNSS Veri Kümesi — Bölüm III](https://data.mendeley.com/datasets/nxk9r22wd6/3)
 
 ```
 data/
   raw/
     GNSS Dataset (with Interference and Spoofing) Part III/
-      1221/           # Attack data
-      Processed data/ # Clean data (folders 21-30)
+      1221/           # Saldırı verisi
+      Processed data/ # Temiz veri (21-30 arası klasörler)
 ```
 
-> If you skip this step, you can still train on simulated data — no download needed.
+> Bu adımı atlarsanız yine de simüle edilmiş veri üzerinde eğitim yapabilirsiniz — indirme gerekmez.
 
-### 3. Train Models
+### 3. Modelleri Eğit
 
 ```bash
-# With simulated data (works immediately):
+# Simüle edilmiş veriyle (hemen çalışır):
 python scripts/train.py
 
-# With Mendeley dataset:
+# Mendeley veri kümesiyle:
 python scripts/train.py --dataset mendeley --data-path data/raw/
 ```
 
-You can also train directly from the dashboard UI (Model & Config section).
+Eğitimi arayüzdeki Model ve Yapılandırma bölümünden de başlatabilirsiniz.
 
-### 4. Run
+### 4. Çalıştır
 
 ```bash
 python -m backend.main
 ```
 
-Open: **http://localhost:8000**
+Açın: **http://localhost:8000**
 
-## Dashboard
+## Gösterge Paneli
 
-| Section | Description |
-|---------|-------------|
-| **Left Panel** | Live satellite list with per-satellite CN0, elevation |
-| **Center** | Interactive 3D globe — satellites orbit, connection lines show signal quality |
-| **Right Panel** | Anomaly scores (jamming/spoofing/integrity/isolation forest), signal history chart, detection log |
-| **Bottom** | Red Team attack controls, model training, threshold tuning, alert feed |
+| Bölüm | Açıklama |
+|-------|----------|
+| **Sol Panel** | Uydu başına CN0 ve yükselim açısıyla canlı uydu listesi |
+| **Merkez** | Etkileşimli 3D küre — uydular yörüngede döner, bağlantı hatları sinyal kalitesini gösterir |
+| **Sağ Panel** | Anomali skorları (bozma/sahteciliği/bütünlük/izolasyon ormanı), sinyal geçmişi grafiği, tespit günlüğü |
+| **Alt** | Kırmızı Takım saldırı kontrolleri, model eğitimi, eşik ayarı, uyarı akışı |
 
-### Injecting Attacks
+### Saldırı Enjeksiyonu
 
-From the Red Team Control Panel:
+Kırmızı Takım Kontrol Panelinden:
 
-- **Jamming:** Select type (Wideband/Narrowband/Pulsed), set power and ramp duration
-- **Spoofing:** Select type (Position Push/Time Push/Meaconing), set offset distance and ramp duration
-- **Auto Demo:** Toggle for automatic attack cycling (20s nominal → 8s jam → 12s nominal → 8s spoof)
+- **Bozma:** Tür seçin (Geniş Bant/Dar Bant/Darbeli), güç ve artış süresini ayarlayın
+- **Sahteciliği:** Tür seçin (Konum İtme/Zaman İtme/Meaconing), mesafe sapması ve artış süresini ayarlayın
+- **Otomatik Demo:** Otomatik saldırı döngüsü için etkinleştirin (20s nominal → 8s bozma → 12s nominal → 8s sahteciliği)
 
 ### REST API
 
 ```
-GET  /api/status         System health and model status
-GET  /api/snapshot       Single GNSS snapshot with detection
-POST /api/attack/start   Start attack injection
-POST /api/attack/stop    Stop all attacks
-POST /api/train          Train ML models (background)
-GET  /api/train/status   Training progress and results
-POST /api/thresholds     Update detection thresholds
-WS   /ws                 Live GNSS stream at 2Hz
+GET  /api/status         Sistem sağlığı ve model durumu
+GET  /api/snapshot       Tespitli tek GNSS anlık görüntüsü
+POST /api/attack/start   Saldırı enjeksiyonunu başlat
+POST /api/attack/stop    Tüm saldırıları durdur
+POST /api/train          ML modellerini eğit (arka planda)
+GET  /api/train/status   Eğitim ilerlemesi ve sonuçları
+POST /api/thresholds     Tespit eşiklerini güncelle
+WS   /ws                 2Hz'de canlı GNSS akışı
 ```
 
-## Architecture
+## Mimari
 
 ```
-GNSSSimulator ──► AttackEngine (intensity ramping)
+GNSSSimülatör ──► SaldırıMotoru (yoğunluk artışı)
        │
-  GNSSSnapshot (10-dimensional feature vector)
+  GNSSAnlıkGörüntü (10 boyutlu özellik vektörü)
        │
-  AnomalyDetector:
-    Layer 1: Rule-based    (instant, explainable)
-    Layer 2: Random Forest (supervised, 3-class: NOMINAL/JAMMING/SPOOFING)
-    Layer 3: Isolation Forest (unsupervised, catches novel attacks)
+  AnomaliBelirleyici:
+    Katman 1: Kural tabanlı    (anlık, açıklanabilir)
+    Katman 2: Rastgele Orman   (denetimli, 3 sınıf: NOMİNAL/BOZMA/SAHTECİLİK)
+    Katman 3: İzolasyon Ormanı (denetimsiz, yeni saldırıları yakalar)
        │
-  Decision Fusion ──► WebSocket broadcast ──► Dashboard UI
+  Karar Birleştirme ──► WebSocket yayını ──► Gösterge Paneli Arayüzü
 ```
 
-### Feature Vector
+### Özellik Vektörü
 
-| Feature | Description |
-|---------|-------------|
-| avg_cn0 | Mean C/N0 across visible satellites |
+| Özellik | Açıklama |
+|---------|----------|
+| avg_cn0 | Görünür uydular genelinde ortalama C/N0 |
 | min_cn0 | Minimum C/N0 |
-| std_cn0 | CN0 standard deviation |
-| cn0_delta | CN0 change rate |
-| visible_count | Number of visible satellites |
-| hdop | Horizontal dilution of precision |
-| pos_delta_m | Position jump in meters |
-| clock_offset_delta_ns | Clock bias change rate |
-| doppler_residual | Doppler consistency metric |
-| agc_level | Automatic gain control level |
+| std_cn0 | C/N0 standart sapması |
+| cn0_delta | C/N0 değişim hızı |
+| visible_count | Görünür uydu sayısı |
+| hdop | Yatay hassasiyet düşümü |
+| pos_delta_m | Metre cinsinden konum sıçraması |
+| clock_offset_delta_ns | Saat kayması değişim hızı |
+| doppler_residual | Doppler tutarlılık metriği |
+| agc_level | Otomatik kazanç kontrolü seviyesi |
 
-## Project Structure
+## Proje Yapısı
 
 ```
 bkzs-antispoofing/
 ├── backend/
-│   ├── main.py              # FastAPI entry point
-│   ├── config.py            # Settings and thresholds
+│   ├── main.py              # FastAPI giriş noktası
+│   ├── config.py            # Ayarlar ve eşikler
 │   ├── gnss/
-│   │   ├── simulator.py     # GNSS signal simulator
-│   │   └── attack_engine.py # Attack injection with ramping
+│   │   ├── simulator.py     # GNSS sinyal simülatörü
+│   │   └── attack_engine.py # Artışlı saldırı enjeksiyonu
 │   ├── ml/
-│   │   ├── detector.py      # 3-layer anomaly detection
-│   │   ├── trainer.py       # Model training pipeline
-│   │   └── dataset_loader.py # Mendeley + synthetic data
+│   │   ├── detector.py      # 3 katmanlı anomali tespiti
+│   │   ├── trainer.py       # Model eğitim hattı
+│   │   └── dataset_loader.py # Mendeley + sentetik veri
 │   └── api/
-│       ├── routes.py        # REST endpoints
-│       └── websocket.py     # WebSocket streaming
+│       ├── routes.py        # REST uç noktaları
+│       └── websocket.py     # WebSocket akışı
 ├── frontend/
-│   ├── index.html           # Dashboard layout
-│   ├── css/dashboard.css    # Styling
+│   ├── index.html           # Gösterge paneli düzeni
+│   ├── css/dashboard.css    # Stil
 │   └── js/
-│       ├── dashboard.js     # Main controller
-│       └── globe.js         # 3D globe (Three.js)
+│       ├── dashboard.js     # Ana denetleyici
+│       └── globe.js         # 3D küre (Three.js)
 ├── scripts/
-│   ├── train.py             # CLI training script
-│   └── prepare_dataset.py   # Dataset preparation
-├── tests/                   # Unit tests
-├── data/                    # Dataset directory (download separately)
-├── models/                  # Trained model files
+│   ├── train.py             # CLI eğitim betiği
+│   └── prepare_dataset.py   # Veri kümesi hazırlama
+├── tests/                   # Birim testleri
+├── data/                    # Veri kümesi dizini (ayrıca indirilir)
+├── models/                  # Eğitilmiş model dosyaları
 └── requirements.txt
 ```
 
-## Dataset
+## Veri Kümesi
 
-**Source:** [Yunnan University — GNSS Dataset with Interference and Spoofing (Part III)](https://data.mendeley.com/datasets/nxk9r22wd6/3)
+**Kaynak:** [Yunnan Üniversitesi — Parazit ve Sahteciliği İçeren GNSS Veri Kümesi (Bölüm III)](https://data.mendeley.com/datasets/nxk9r22wd6/3)
 
-This dataset contains real GNSS observations with interference and spoofing scenarios. Place the extracted data in `data/raw/`. The system also supports training on fully synthetic data if the dataset is not available.
+Bu veri kümesi, parazit ve sahteciliği senaryolarıyla gerçek GNSS gözlemlerini içermektedir. Çıkartılan veriyi `data/raw/` dizinine yerleştirin. Sistem, veri kümesi mevcut değilse tamamen sentetik veri üzerinde eğitimi de destekler.
 
-## License
+## Lisans
 
 MIT
